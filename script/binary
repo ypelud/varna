@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -e
+
+# if ! test -e autogen/gen.go; then
+# 	echo >&2 'error: generate must be run before binary'
+# 	false
+# fi
+
+rm -f dist/varna
+
+FLAGS=""
+if [ -n "$VERBOSE" ]; then
+    FLAGS="${FLAGS} -v"
+fi
+
+if [ -z "$VERSION" ]; then
+    VERSION=0.1 #$(git rev-parse HEAD)
+fi
+
+if [ -z "$CODENAME" ]; then
+    CODENAME=first
+fi
+
+if [ -z "$DATE" ]; then
+    DATE=$(date -u '+%Y-%m-%d_%I:%M:%S%p')
+fi
+
+# Build binaries
+CGO_ENABLED=0 GOGC=off go build $FLAGS -ldflags "-s -w \
+    -X github.com/ypelud/varna/version.Version=$VERSION \
+    -X github.com/ypelud/varna/version.Codename=$CODENAME \
+    -X github.com/ypelud/varna/version.BuildDate=$DATE" \
+    -a -installsuffix nocgo -o dist/varna 
